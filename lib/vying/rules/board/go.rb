@@ -9,11 +9,12 @@ Rules.create("Go") do
   cache :moves
 
   position do
-    attr_reader :board, :prisoners
+    attr_reader :board, :prisoners, :ko_move
 
     def init
       @board = Board.square(19, :plugins => [:go])
       @prisoners = {:black => 0, :white => 0}
+      @ko_move = nil
     end
 
     def moves
@@ -22,12 +23,27 @@ Rules.create("Go") do
       elsif counting?
         
       else   
-        board.non_suicide_moves(turn)
+        m = board.non_suicide_moves(turn)
+        if @ko_move
+          m.delete(@ko_move)
+        end
+        return m
       end
     end
 
     def apply!(move)
-      @prisoners[turn] += board.put_stone(move, turn)
+      captured = board.put_stone(move, turn)
+      prisoners[turn] += captured.size
+
+      # check for possible ko if exactly one
+      # stone was captured
+      @ko_move = nil
+      if captured.size == 1
+        if board.count_liberties(move) == 1
+          @ko_move = captured.first
+        end
+      end
+
       rotate_turn
       self
     end

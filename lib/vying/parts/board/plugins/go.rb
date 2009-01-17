@@ -8,13 +8,13 @@ module Board::Plugins::Go
 
   def put_stone(c, p)
     self[c] = p
-    prisoners = 0
+    prisoners = []
     c = c.to_coords.first
     coords.neighbors(c).each { |nc|
       next if self[nc].nil? || self[nc] == p
 
       if count_liberties(nc) == 0
-        prisoners += capture_group(nc)
+        prisoners.concat(capture_group(nc))
       end
     }
     return prisoners
@@ -77,9 +77,9 @@ module Board::Plugins::Go
     todo = [c]
     all = { c => c }
 
-    count = 0
+    captured = []
     while(c = todo.pop)
-      count += 1
+      captured.push(c)
       self[c] = nil
       coords.neighbors(c).each { |nc|
         unless all[nc]
@@ -90,7 +90,7 @@ module Board::Plugins::Go
         end
       }
     end
-    return count
+    return captured
   end
 
 end
