@@ -71,7 +71,7 @@ class TestGo < Test::Unit::TestCase
     g << %w{j8 j11 i9 i10 k9 k10 j10 j9}
     # black j10 should be forbidden by the ko rule
     assert( !g.moves.include?('j10') )
-    # so we move elsewhere
+    # we move elsewhere
     g << 'a1'
     # so does white
     g << 'a2'
@@ -79,7 +79,4 @@ class TestGo < Test::Unit::TestCase
     assert( g.moves.include?('j10') )
   end
 
-  def test_superko
-    assert(false)
-  end
 end
