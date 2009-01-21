@@ -23,6 +23,10 @@ class TestGo < Test::Unit::TestCase
     assert_equal( [:black], g.has_moves )
     g << g.moves.first
     assert_equal( [:white], g.has_moves )
+
+    g << %w{ pass pass }
+    assert( g.has_moves.include?(:white) )
+    assert( g.has_moves.include?(:black) )
   end
 
   def test_liberty_count
@@ -79,4 +83,25 @@ class TestGo < Test::Unit::TestCase
     assert( g.moves.include?('j10') )
   end
 
+  def test_list_groups
+    g = Game.new( rules )
+    g << %w{ a1 l7 b1 k7 c2 k8 c3 m8 d3 m9
+             d2 l9 k9 j9 d4 j10 d5 k11 d6
+             j11 d7 l10}
+    b = g.board
+    # now we should have three black groups
+    # and three white groups
+    assert_equal(3, b.list_groups(:white).size)
+    assert_equal(3, b.list_groups(:black).size)
+    assert_equal(6, b.list_groups.size)
+    # we capture one group
+    c = 'k9'.to_coords.first
+    captured = b.capture_group(c)
+    assert_equal([c], captured)
+    # white groups shouldn't have changed
+    assert_equal(3, b.list_groups(:white).size)
+    # but black groups should have
+    assert_equal(2, b.list_groups(:black).size)
+    assert_equal(5, b.list_groups.size)
+  end
 end

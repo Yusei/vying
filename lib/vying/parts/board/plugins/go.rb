@@ -93,4 +93,51 @@ module Board::Plugins::Go
     return captured
   end
 
+  # List groups belonging to player p. If p
+  # is nil, list all groups
+  def list_groups(p=nil)
+    if p.nil?
+      return list_groups(:black) + list_groups(:white)
+    else
+      c = 'a1'.to_coords.first
+      todo = [c]
+      groups = []
+      all = { c => nil }
+      seen = { c => true }
+
+      ((coords.bounds.first.x)..(bounds.last.x)).each do |x|
+        ((coords.bounds.first.y)..(bounds.last.y)).each do |y|
+          c = Coord.new(x, y)
+          seen[c] = true
+          if self[c] != nil
+            if self[c] == p
+              n = coords.neighbors(c, [:n, :w])
+              gn = all[n[0]]
+              gw = all[n[1]]
+              if gn && gw && gn != gw
+                # we merge both groups in gn
+                groups.delete(gw)
+                gn = gn.concat(gw)
+                all.find_all { |k,v| v == gw }.each { |k,v| all[k] = gn }
+                # and add c to gn
+                gn << c
+                all[c] = gn
+              elsif gn
+                gn << c
+                all[c] = gn
+              elsif gw
+                gw << c
+                all[c] = gw
+              else
+                all[c] = [c]
+                groups << all[c]
+              end
+            end
+          end
+        end
+      end
+
+      return groups
+    end
+  end
 end
